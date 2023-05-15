@@ -1,0 +1,142 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model token {
+  id            Int      @id @default(autoincrement())
+  value         String   @db.VarChar(600)
+  isBlacklisted Boolean  @default(false)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  userID        Int?
+  user          user?    @relation(fields: [userID], references: [id], onDelete: Cascade)
+
+  @@index([value])
+}
+
+enum etat_tache {
+  FINIE
+  EN_COURS
+  REJETEE
+}
+
+model tache {
+  id           Int        @id @default(autoincrement())
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
+  quantite     Int        @default(1)
+  rejectReason String?
+  etat         etat_tache @default(EN_COURS)
+  user         user?      @relation(fields: [userID], references: [id], onDelete: Cascade)
+  userID       Int?
+  produit      produit?   @relation(fields: [produitID], references: [id], onDelete: Cascade)
+  produitID    Int?
+}
+
+model demande_restock {
+  id         Int      @id @default(autoincrement())
+  user       user?    @relation(fields: [userID], references: [id], onDelete: Cascade)
+  userID     Int?
+  produit    produit? @relation(fields: [produitID], references: [id], onDelete: Cascade)
+  produitID  Int?
+  quantite   Int
+  fulfilled  Boolean  @default(false)
+  created_at DateTime @default(now())
+}
+
+model user {
+  id                  Int               @id @default(autoincrement())
+  nom                 String
+  prenom              String
+  trigramme           String            @unique
+  password            String
+  equipeID            Int?
+  isAdmin             Boolean           @default(false)
+  image               image?
+  equipe              equipe?           @relation(fields: [equipeID], references: [id], onDelete: Cascade)
+  taches              tache[]
+  tokens              token[]
+  created_at          DateTime          @default(now())
+  updated_at          DateTime          @updatedAt
+  demandes_de_restock demande_restock[]
+
+  @@unique([trigramme, equipeID])
+}
+
+model produit {
+  id                      Int               @id @default(autoincrement())
+  nom                     String
+  marqueID                Int
+  quantite                Int
+  quantiteEnTachesEnCours Int?              @default(0)
+  images                  image[]
+  taches                  tache[]
+  categories              categorie[]
+  marque                  marque            @relation(fields: [marqueID], references: [id], onDelete: Cascade)
+  updated_at              DateTime          @updatedAt
+  demandes_de_restock     demande_restock[]
+}
+
+model image {
+  id        Int      @id @default(autoincrement())
+  path      String
+  produit   produit? @relation(fields: [produitID], references: [id], onDelete: Cascade)
+  produitID Int?
+  user      user?    @relation(fields: [userID], references: [id])
+  userID    Int?     @unique
+}
+
+model categorie {
+  id         Int       @id @default(autoincrement())
+  nom        String    @unique
+  produits   produit[]
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+}
+
+model marque {
+  id         Int       @id @default(autoincrement())
+  nom        String    @unique
+  produits   produit[]
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+}
+
+model equipe {
+  id         Int      @id @default(autoincrement())
+  nom        String   @unique
+  users      user[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+enum statut_facture {
+  PAYEE
+  EN_COURS
+}
+
+model facture {
+  id            Int            @id @default(autoincrement())
+  montant       Float
+  fournisseurID Int
+  statut        statut_facture @default(EN_COURS)
+  fournisseur   fournisseur?   @relation(fields: [fournisseurID], references: [id], onDelete: Cascade)
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+}
+
+model fournisseur {
+  id         Int       @id @default(autoincrement())
+  nom        String    @unique
+  factures   facture[]
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+}

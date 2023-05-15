@@ -1,0 +1,39 @@
+{
+  "name": "back",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "jest --testTimeout=5000 --runInBand",
+    "start": "nodemon server.js",
+    "db-seed": "node ./db_commands/seed.js",
+    "db-flush": "node ./db_commands/empty.js"
+  },
+  "repository": "git+https://github.com/salahmedamin/pfe-backend.git",
+  "keywords": [],
+  "author": "salahmedamin2019 <salahmedamin2019@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/salahmedamin/pfe-backend/issues"
+  },
+  "homepage": "https://github.com/salahmedamin/pfe-backend#readme",
+  "dependencies": {
+    "@prisma/client": "^4.11.0",
+    "axios": "^1.3.4",
+    "bcrypt": "^5.1.0",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.21"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^7.6.0",
+    "@types/jest": "^29.4.0",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "jest": "^29.5.0",
+    "prisma": "^4.11.0",
+    "supertest": "^6.3.3"
+  }
+}
